@@ -43,9 +43,13 @@ def batch_compute_posterior_robust(self, X):
     return posteriors_mean, posteriors_sd
 
 def batch_compute_posterior(self, X):
+    print("start batch_compute_posterior")
     framelogprob, fwdlattice, logprob = batch_compute_loglikeli(self, X)
+    print("After line1 batch_compute_posterior")
     bwdlattice = self._do_backward_pass(framelogprob)
+    print("After line2 batch_compute_posterior")
     posteriors = self._compute_posteriors(fwdlattice, bwdlattice)
+    print("end batch_compute_posterior")
     return framelogprob, posteriors, fwdlattice, bwdlattice, logprob
 
 def batch_accumulate_suff_state(self, X):
@@ -136,6 +140,7 @@ class _BaseHMM(BaseEstimator):
                  replicate='sum'
                  ):
         self.n_components = n_components
+        print("self.n_components should be 1", self.n_components)
         self.params = params
         self.init_params = init_params
         self.startprob_prior = startprob_prior
@@ -143,13 +148,16 @@ class _BaseHMM(BaseEstimator):
         self.algorithm = algorithm
         self.random_state = random_state
         self.n_iter = n_iter
+        print("self.n_iter should be 10", self.n_iter)
         self.tol = tol
+        print("self.tol should be 1e-2", self.tol)
         self.verbose = verbose
-        self.n_jobs = n_jobs
+        self.n_jobs = 66 #n_jobs
         self.monitor_ = MinibatchMonitor(self.tol, self.n_iter, self.verbose)
         self.check_fitted = "transmat_"
         self.emission_prior = emission_prior
         self.replicate = replicate
+        print("self.n_jobs at end of init", self.n_jobs)
 
     def get_stationary_distribution(self):
         """Compute the stationary distribution of states.
@@ -236,21 +244,29 @@ class _BaseHMM(BaseEstimator):
         score : Compute the log probability under the model.
         decode : Find most likely state sequence corresponding to ``X``.
         """
+        print("self.n_jobs start score_function", self.n_jobs)
+
         X = self._trim_array(X)
         check_is_fitted(self, self.check_fitted)
         self._check()
 
         X = _check_array(X)
-
+        print("type(X[0])", type(X[0]))
+        print("X[0].dtype", X[0].dtype )
+        print("self.n_jobs", self.n_jobs)
         n_jobs = effective_n_jobs(self.n_jobs)
         parallel = Parallel(n_jobs=n_jobs, verbose=max(0,
                             self.verbose - 1))
 
         lengths = X[0].shape[0]//n_jobs
+        print("lengths", lengths)
+        print("X[0].shape", X[0].shape)
+        print("len(X)", len(X))
 
         results = parallel(delayed(batch_compute_posterior)(self, get_batch(X, i, j))
-                           for i, j in iter_from_X_lengths(X, lengths))
+                            for i, j in iter_from_X_lengths(X, lengths))
 
+        # results = batch_compute_posterior(self, X)
         _, posteriors, _, _, logprob_ = zip(*results)
 
         logprob = sum(logprob_)
@@ -410,7 +426,7 @@ class _BaseHMM(BaseEstimator):
         posteriors : array, shape (n_samples, n_components)
             State-membership probabilities for each sample from ``X``.
         """
-        
+
         algorithm = algorithm or self.algorithm
 
         if algorithm == 'robust_map':

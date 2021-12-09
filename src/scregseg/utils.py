@@ -28,7 +28,8 @@ def get_nsamples(X):
 
 
 def get_batch(X, i, j):
-
+    print("get_batch")
+    print("type(X)", type(X))
     if isinstance(X, list):
         return [x[i:j] for x in X]
     return X[i:j]
@@ -41,6 +42,10 @@ def _to_list(objs):
 
 
 def iter_from_X_lengths(X, lengths, state=None):
+    print("iter_from_X_lengths")
+    print("type(X)", type(X))
+    print("type(lengths)", type(lengths))
+    print("lengths",lengths)
     if isinstance(X, list):
         x = X[0]
     else:
@@ -54,6 +59,8 @@ def iter_from_X_lengths(X, lengths, state=None):
         else:
             starts = state.permutation(np.arange(0, x.shape[0], lengths))
         for i, start in enumerate(starts):
+            print("start", start)
+            print("min(start + lengths, x.shape[0])", min(start + lengths, x.shape[0]))
             yield start, min(start + lengths, x.shape[0])
     elif isinstance(lengths, list):
         n_samples = x.shape[0]
@@ -91,7 +98,7 @@ def make_folders(output):
         """ Create folder """
         os.makedirs(output, exist_ok=True)
 
-def run_commandline(args): 
+def run_commandline(args):
     cmd = args[0]
     options = args[1:]
     output = args[-1]
