@@ -21,9 +21,10 @@ def _fast_dirmul_loglikeli_sp(const int[:] x_indices,
     """
     cdef int n_states = alpha.shape[0]
     cdef int n_cells = alpha.shape[1]
-    cdef int r, c, s, m, ci, maxcounts
-    cdef double[::view.contiguous] n = np.zeros(n_regions, dtype=np.float)
-    cdef double[::view.contiguous] alpha0 = np.zeros(n_states, dtype=np.float)
+    cdef int r, c, s, m, ci
+    cdef long maxcounts
+    cdef double[::view.contiguous] n = np.zeros(n_regions, dtype=np.double)
+    cdef double[::view.contiguous] alpha0 = np.zeros(n_states, dtype=np.double)
     cdef double[:, :, :] precomp
     # = np.zeros((maxcounts, n_cells, n_states), dtype=np.float)
 
@@ -33,12 +34,21 @@ def _fast_dirmul_loglikeli_sp(const int[:] x_indices,
         # init array
         for r in range(n_regions):
             for c in range(x_indptr[r], x_indptr[r+1]):
+                # printf("in loop for c in range", r)
                 n[r] += x_cnts[c]
                 if maxcounts < x_cnts[c]:
+                    printf("if maxcounts < x_cnts[c]\n")
+                    printf("r\n")
+                    printf("%i\n", r)
+                    printf("x_cnts[c]\n")
+                    printf("%ld\n", x_cnts[c])
                     maxcounts = x_cnts[c]
-    
-    precomp = np.zeros((maxcounts, n_cells, n_states), dtype=np.float)
-    with nogil:
+    printf("maxcounts\n")
+    printf("%ld\n", maxcounts)
+    precomp = np.zeros((maxcounts, n_cells, n_states), dtype=np.double)
+    printf("after precomp\n")
+    #with nogil:
+    if False:
         for s in range(n_states):
             for c in range(n_cells):
                 alpha0[s] += alpha[s, c]

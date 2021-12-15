@@ -129,9 +129,11 @@ def dirmul_loglikeli_sp_mincov(x, alpha, maxcounts=3, mincov = 100):
 
 def fast_dirmul_loglikeli_sp(x, alpha):
     result = np.zeros((x.shape[0], alpha.shape[0]))
+    print("x.shape", x.shape)
     print("result", result)
     print("x.indices", x.indices)
     print("x.indptr", x.indptr)
+    print("len(x.indptr)", len(x.indptr))
     print("x.data.astype('int')", x.data.astype('int'))
     print("type(x.indices)", type(x.indices))
     print("type(x.indptr)", type(x.indptr))
@@ -139,6 +141,9 @@ def fast_dirmul_loglikeli_sp(x, alpha):
     print("type(alpha)", type(alpha))
     print("type(x.shape[0])", type(x.shape[0]))
     print("type(result)", type(result))
+    print("np.isnan(np.sum(x.data.astype('int')))", np.isnan(np.sum(x.data.astype('int'))))
+    print("np.max(x.data.astype('int'))", np.max(x.data.astype('int')))
+    print("np.min(x.data.astype('int'))", np.min(x.data.astype('int')))
     _fast_dirmul_loglikeli_sp(x.indices, x.indptr, x.data.astype('int'),
                              alpha, x.shape[0], result)
     print("after _fast")

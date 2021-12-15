@@ -258,10 +258,11 @@ class _BaseHMM(BaseEstimator):
         print("X[0].dtype", X[0].dtype )
         print("self.n_jobs", self.n_jobs)
         n_jobs = effective_n_jobs(self.n_jobs)
-        parallel = Parallel(n_jobs=n_jobs, verbose=50, backend="multiprocessing", # max(0,                            self.verbose - 1)) #, 
+        parallel = Parallel(n_jobs=n_jobs, verbose=50, backend="multiprocessing") #, # max(0,                            self.verbose - 1)) #, 
         #    temp_folder="./../notebooks/ATAC_feature_selection/Mimitou2021/tmp")
 
-        lengths = 40000 #  X[0].shape[0]//n_jobs
+        #lengths = 60000 #  X[0].shape[0]//n_jobs
+        lengths = X[0].shape[0]//n_jobs
         print("lengths", lengths)
         print("X[0].shape", X[0].shape)
         print("len(X)", len(X))
