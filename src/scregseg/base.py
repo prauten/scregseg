@@ -28,8 +28,11 @@ DECODER_ALGORITHMS = frozenset(("viterbi", "map", "robust_map"))
 EPS = 1e-6
 
 def batch_compute_loglikeli(self, X):
+    print("In batch_compute_logelikeli")
     framelogprob = self._compute_log_likelihood(X)
+    print("After framelogprob.")
     logprob, fwdlattice = self._do_forward_pass(framelogprob)
+    print("After forward pass.")
     return framelogprob, fwdlattice, logprob
 
 def batch_compute_posterior_robust(self, X):
@@ -152,7 +155,7 @@ class _BaseHMM(BaseEstimator):
         self.tol = tol
         print("self.tol should be 1e-2", self.tol)
         self.verbose = verbose
-        self.n_jobs = 66 #n_jobs
+        self.n_jobs = n_jobs
         self.monitor_ = MinibatchMonitor(self.tol, self.n_iter, self.verbose)
         self.check_fitted = "transmat_"
         self.emission_prior = emission_prior
@@ -255,16 +258,18 @@ class _BaseHMM(BaseEstimator):
         print("X[0].dtype", X[0].dtype )
         print("self.n_jobs", self.n_jobs)
         n_jobs = effective_n_jobs(self.n_jobs)
-        parallel = Parallel(n_jobs=n_jobs, verbose=max(0,
-                            self.verbose - 1))
+        parallel = Parallel(n_jobs=n_jobs, verbose=50, backend="multiprocessing", # max(0,                            self.verbose - 1)) #, 
+        #    temp_folder="./../notebooks/ATAC_feature_selection/Mimitou2021/tmp")
 
-        lengths = X[0].shape[0]//n_jobs
+        lengths = 40000 #  X[0].shape[0]//n_jobs
         print("lengths", lengths)
         print("X[0].shape", X[0].shape)
         print("len(X)", len(X))
 
-        results = parallel(delayed(batch_compute_posterior)(self, get_batch(X, i, j))
-                            for i, j in iter_from_X_lengths(X, lengths))
+        results = []
+        for i, j in iter_from_X_lengths(X, lengths):
+            print("i,j", i,j)
+            results.append(batch_compute_posterior(self, get_batch(X, i, j)))
 
         # results = batch_compute_posterior(self, X)
         _, posteriors, _, _, logprob_ = zip(*results)
@@ -556,12 +561,15 @@ class _BaseHMM(BaseEstimator):
         return logprob, state_sequence
 
     def _do_forward_pass(self, framelogprob):
+        print("Do forward pass.")
         n_samples, n_components = framelogprob.shape
+        print("n_samples, n_components:", n_samples, n_components)
         fwdlattice = np.zeros((n_samples, n_components))
         _hmmc._forward(n_samples, n_components,
                        log_mask_zero(self.startprob_),
                        log_mask_zero(self.transmat_),
                        framelogprob, fwdlattice)
+        print("_hmmc._forward finished")
         with np.errstate(under="ignore"):
             return logsumexp(fwdlattice[-1]), fwdlattice
 

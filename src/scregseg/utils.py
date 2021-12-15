@@ -30,7 +30,13 @@ def get_nsamples(X):
 def get_batch(X, i, j):
     print("get_batch")
     print("type(X)", type(X))
-    if isinstance(X, list):
+    print("type(X[0])", type(X[0]))
+    print("len(X)", len(X))
+    print("X[0].shape", X[0].shape)
+    # if isinstance(X, list):
+    if type(X) == list:
+        print("Is list")
+        print("X[0][i:j].shape", X[0][i:j].shape)
         return [x[i:j] for x in X]
     return X[i:j]
 

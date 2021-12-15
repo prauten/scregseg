@@ -129,8 +129,19 @@ def dirmul_loglikeli_sp_mincov(x, alpha, maxcounts=3, mincov = 100):
 
 def fast_dirmul_loglikeli_sp(x, alpha):
     result = np.zeros((x.shape[0], alpha.shape[0]))
+    print("result", result)
+    print("x.indices", x.indices)
+    print("x.indptr", x.indptr)
+    print("x.data.astype('int')", x.data.astype('int'))
+    print("type(x.indices)", type(x.indices))
+    print("type(x.indptr)", type(x.indptr))
+    print("type(x.data.astype('int'))", type(x.data.astype('int')))
+    print("type(alpha)", type(alpha))
+    print("type(x.shape[0])", type(x.shape[0]))
+    print("type(result)", type(result))
     _fast_dirmul_loglikeli_sp(x.indices, x.indptr, x.data.astype('int'),
                              alpha, x.shape[0], result)
+    print("after _fast")
     return result
     
 def get_region_cnts(dat):
@@ -342,13 +353,14 @@ class DirMulHMM(_BaseHMM):
         
 
     def _compute_log_likelihood_one(self, X, i):
-        
+        print("_compute_log_likelihood_one")
         # loop over datasets each represented via a multinomial
         #for i, (ep, es, x) in enumerate(zip(self.emission_prior_, self.emission_suffstats_, X)):
             # compute the marginal likelihood with the current posterior parameters
         return fast_dirmul_loglikeli_sp(X[i], self.emission_prior_[i] + self.emission_suffstats_[i])
 
     def _compute_log_likelihood(self, X):
+        print("_comput_log_likelihood")
         res = np.zeros((len(X), get_nsamples(X), self.n_components))
         # loop over datasets each represented via a multinomial
         for i in range(len(X)):
